@@ -20,14 +20,22 @@ def fetch_lta_dataset(endpoint: str) -> dict:
 
     url = f"{BASE_URL}/{endpoint}"
 
-    response = requests.get(url, headers=headers)
+    all_records = []
+    skip_count = 0
 
-    if response.status_code == 200:
-        return response.json()
-    else:
-        response.raise_for_status()
+    while True:
+        params = {"$skip": skip_count}
+        response = requests.get(url, headers=headers, params=params)
+        
+        data = response.json()
+        batch = data.get("value", [])
+        if not batch:
+            break
 
-    return response.json()
+        all_records.extend(batch)
+        skip_count += 500 # API only returns 500 records per page
+        
+    return {"value": all_records}
 
 def save_raw_data(data: dict, dataset_name: str) -> str:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
