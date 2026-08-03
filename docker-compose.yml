@@ -1,0 +1,9 @@
+services:
+  ingestion-service:
+    build: .
+    container_name: transport-buddy
+    env_file:
+      - .env
+    volumes:
+      # Mount the local data folder so raw files saved inside the container persist on your computer
+      - ./data:/app/data
